@@ -6,7 +6,7 @@ if len(sys.argv) < 2:
     print("Please specify pid to monitor")
     sys.exit(0)
 
-host = socket.gethostname()
 pid = sys.argv[1]
+host = sys.argv[2] or socket.gethostname()
 
 delete_pid(host, pid)
