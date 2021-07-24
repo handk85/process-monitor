@@ -19,7 +19,7 @@ def update_monitor_table():
     host = socket.gethostname()
     pids = get_pids(host)
     if len(pids) < 1:
-        logging.info("No process ids to check in the host:", host)
+        logging.info("No process ids to check in the host: %s", host)
         return
     info = [ProcessInfo(host, pid, psutil.pid_exists(int(pid))).__dict__ for pid in pids]
     batch_put_pid_info(info)
