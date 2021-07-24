@@ -27,6 +27,38 @@ def validate_put_obj(obj: dict):
         raise Exception("Either 'host' or 'pid' is missing in data: ", obj)
 
 
+def create_monitor_table():
+    try:
+        response = ddb.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {
+                    'AttributeName': 'host',
+                    'KeyType': 'HASH'
+                }, {
+                    'AttributeName': 'pid',
+                    'KeyType': 'RANGE'
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'host',
+                    'AttributeType': 'S'
+                }, {
+                    'AttributeName': 'pid',
+                    'AttributeType': 'S'
+                }
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 1,
+                'WriteCapacityUnits': 1
+            }
+        )
+        logging.info(response)
+    except Exception as e:
+        logging.error(e, exc_info=True)
+
+
 def deserialize_items(items: list):
     processes = []
     for item in items:
@@ -35,15 +67,19 @@ def deserialize_items(items: list):
 
 
 def scan_all():
+    global ddb
     try:
         response = ddb.scan(TableName=table_name)
     except Exception as e:
         logging.error(e, exc_info=True)
+        ddb = boto3.client("dynamodb", region_name=region_name)
+        return None
 
     return deserialize_items(response["Items"])
 
 
 def get_processes(host: str):
+    global ddb
     try:
         response = ddb.query(KeyConditionExpression="host = :host",
                              ExpressionAttributeValues={
@@ -52,16 +88,19 @@ def get_processes(host: str):
                              TableName=table_name)
     except Exception as e:
         logging.error(e, exc_info=True)
+        ddb = boto3.client("dynamodb", region_name=region_name)
+        return None
 
     return deserialize_items(response["Items"])
 
 
 def get_pids(host: str):
     processes = get_processes(host)
-    return [x['pid'] for x in processes]
+    return [x['pid'] for x in processes] if processes else None
 
 
 def batch_put_pid_info(objs: list):
+    global ddb
     [validate_put_obj(obj) for obj in objs]
     request = {
         table_name: [{"PutRequest":
@@ -73,6 +112,7 @@ def batch_put_pid_info(objs: list):
         logging.info(resp)
     except Exception as e:
         logging.error(e, exc_info=True)
+        ddb = boto3.client("dynamodb", region_name=region_name)
 
 
 def put_pid_info(obj: dict):

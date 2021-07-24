@@ -18,6 +18,11 @@ class ProcessInfo:
 def update_monitor_table():
     host = socket.gethostname()
     pids = get_pids(host)
+
+    # if no info returned, just stop the function
+    if not pids:
+        return
+
     if len(pids) < 1:
         logging.info("No process ids to check in the host: %s", host)
         return

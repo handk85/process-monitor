@@ -14,6 +14,10 @@ def local_notification(title, message):
 def local_monitor():
     info = scan_all()
     logging.info(info)
+    # if no info returned, just stop the function
+    if not info:
+        return
+
     for item in info:
         host_pid = "%s-%s" % (item["host"], item["pid"])
         if host_pid in status_dict and item['status'] != status_dict[host_pid]:
