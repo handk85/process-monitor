@@ -27,6 +27,22 @@ def validate_put_obj(obj: dict):
         raise Exception("Either 'host' or 'pid' is missing in data: ", obj)
 
 
+def deserialize_items(items: list):
+    processes = []
+    for item in items:
+        processes.append({k: deserializer.deserialize(v) for k, v in item.items()})
+    return processes
+
+
+def scan_all():
+    try:
+        response = ddb.scan(TableName=table_name)
+    except Exception as e:
+        logging.error(e, exc_info=True)
+
+    return deserialize_items(response["Items"])
+
+
 def get_processes(host: str):
     try:
         response = ddb.query(KeyConditionExpression="host = :host",
@@ -37,10 +53,7 @@ def get_processes(host: str):
     except Exception as e:
         logging.error(e, exc_info=True)
 
-    processes = []
-    for item in response["Items"]:
-        processes.append({k: deserializer.deserialize(v) for k, v in item.items()})
-    return processes
+    return deserialize_items(response["Items"])
 
 
 def get_pids(host: str):
