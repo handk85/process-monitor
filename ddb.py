@@ -126,7 +126,7 @@ def put_pid_info(obj: dict):
 
 
 def put_basic_pid(host: str, pid: str):
-    item = {"host": host, "pid": pid}
+    item = {"host": host, "pid": pid, "status": "Running"}
     put_pid_info(item)
 
 
