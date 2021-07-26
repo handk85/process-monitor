@@ -1,4 +1,4 @@
-from ddb import scan_all
+from ddb import scan_all, delete_pid
 import logging
 import schedule
 import time
@@ -24,6 +24,8 @@ def local_monitor():
             message = "[%s %s] status changed from '%s' to '%s'" \
                       % (item['host'], item['pid'], status_dict[host_pid], item['status'])
             local_notification("Process updated", message)
+            # Delete terminated pid
+            delete_pid(item["host"], item["pid"])
         status_dict[host_pid] = item['status']
 
 
