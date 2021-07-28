@@ -30,7 +30,7 @@ def update_monitor_table():
         return
     info = []
     for pid in pids:
-        if psutil.pid_exists(pid):
+        if psutil.pid_exists(int(pid)):
             p = psutil.Process(int(pid))
             info.append(ProcessInfo(host, pid, True, p.cwd(), " ".join(p.cmdline())).__dict__)
         else:
