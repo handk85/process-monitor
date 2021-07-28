@@ -1,5 +1,6 @@
 from ddb import get_pids, batch_put_pid_info
 from datetime import datetime
+from collections import defaultdict
 import logging
 import socket
 import psutil
@@ -16,7 +17,9 @@ class ProcessInfo:
         self.cmdline = cmdline
 
 
-pid_cmdlines = {}
+pid_cmdlines = defaultdict(str)
+
+
 def update_monitor_table():
     global pid_cmdlines
     host = socket.gethostname()
