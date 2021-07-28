@@ -21,8 +21,8 @@ def local_monitor():
     for item in info:
         host_pid = "%s-%s" % (item["host"], item["pid"])
         if host_pid in status_dict and item['status'] != status_dict[host_pid]:
-            message = "[%s %s] status changed from '%s' to '%s'" \
-                      % (item['host'], item['pid'], status_dict[host_pid], item['status'])
+            message = "[%s %s %s] status changed from '%s' to '%s'" \
+                      % (item['host'], item['pid'], item["cmdline"], status_dict[host_pid], item['status'])
             local_notification("Process updated", message)
             # Delete terminated pid
             delete_pid(item["host"], item["pid"])
