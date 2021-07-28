@@ -33,7 +33,8 @@ pip3 install boto3 schedule psutil
 ```
 > python3 register_pid.py [PID]
 ```
-* If you already know the PID and remote machine's hostname (you can check hostname via `hostname` command in a shell), you can register the process remotely
+* If you run `register_pid.py` on the remote machine, you don't need to specify the hostname.
+If not, you can specify the hostname at the end of the script.
 ```
 > python3 register_pid.py [PID] [HOSTNAME]
 ```
