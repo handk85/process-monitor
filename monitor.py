@@ -8,12 +8,11 @@ import time
 
 
 class ProcessInfo:
-    def __init__(self, host: str, pid: str, status: bool, cwd: str = "", cmdline: str = ""):
+    def __init__(self, host: str, pid: str, status: bool, cmdline: str = ""):
         self.host = host
         self.pid = pid
         self.status = "Running" if status else "Terminated"
         self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.cwd = cwd
         self.cmdline = cmdline
 
 
@@ -32,7 +31,7 @@ def update_monitor_table():
     for pid in pids:
         if psutil.pid_exists(int(pid)):
             p = psutil.Process(int(pid))
-            info.append(ProcessInfo(host, pid, True, p.cwd(), " ".join(p.cmdline())).__dict__)
+            info.append(ProcessInfo(host, pid, True, " ".join(p.cmdline())).__dict__)
         else:
             info.append(ProcessInfo(host, pid, False).__dict__)
     batch_put_pid_info(info)
