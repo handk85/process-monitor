@@ -1,6 +1,8 @@
 # Remote Process Monitor
 A simple remote process monitor using a DynamoDB table
 
+![Overview](https://github.com/handk85/process-monitor/blob/master/figures/overview.png?raw=true)
+
 ## Dependencies
 * boto3
 * schedule
