@@ -16,7 +16,9 @@ class ProcessInfo:
         self.cmdline = cmdline
 
 
+pid_cmdlines = {}
 def update_monitor_table():
+    global pid_cmdlines
     host = socket.gethostname()
     pids = get_pids(host)
 
@@ -29,11 +31,12 @@ def update_monitor_table():
         return
     info = []
     for pid in pids:
-        if psutil.pid_exists(int(pid)):
+        if pid not in pid_cmdlines and psutil.pid_exists(int(pid)):
             p = psutil.Process(int(pid))
-            info.append(ProcessInfo(host, pid, True, " ".join(p.cmdline())).__dict__)
-        else:
-            info.append(ProcessInfo(host, pid, False).__dict__)
+            pid_cmdlines[pid] = " ".join(p.cmdline())
+
+        info.append(ProcessInfo(host, pid, psutil.pid_exists(int(pid)), pid_cmdlines[pid]).__dict__)
+
     batch_put_pid_info(info)
 
 
