@@ -124,3 +124,5 @@ Then, you need to execute `local-notification.py` script for monitoring any proc
 You may want to run the script in a screen session.
 
 If there is any status change, it will trigger a notification on your Mac.
+
+![MacOS notification example](https://github.com/handk85/process-monitor/blob/master/figures/notification_example.png?raw=true)
