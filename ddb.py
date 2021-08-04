@@ -101,11 +101,11 @@ def get_pids(host: str):
 
 def batch_put_pid_info(objs: list):
     global ddb
-    [validate_put_obj(obj) for obj in objs]
+    [validate_put_obj(obj.__dict__) for obj in objs]
     request = {
         table_name: [{"PutRequest":
                           {"Item": {k: serializer.serialize(v) for k, v in
-                                    item.items()}}} for item in objs]
+                                    item.__dict__.items()}}} for item in objs]
     }
     try:
         resp = ddb.batch_write_item(RequestItems=request)
