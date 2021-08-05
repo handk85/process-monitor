@@ -94,9 +94,8 @@ def get_processes(host: str):
     return deserialize_items(response["Items"])
 
 
-def get_pids(host: str):
-    processes = get_processes(host)
-    return [x['pid'] for x in processes] if processes else None
+def get_config():
+    return get_processes("Config")
 
 
 def batch_put_pid_info(objs: list):

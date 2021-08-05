@@ -113,6 +113,14 @@ The expected result is as below:
 }
 ```
 
+## Add Webhook integration
+You can add a webhook notification when a process is terminated. Currently, it supports MS Teams webhook only.
+To add integration, you can register the webhook url by executing below command:
+```
+> python3 register_webhook.py [YOUR_WEBHOOK_URL]
+```
+The webhook information is also stored in DynamoDB. It uses "Config" as host name and a randomly generated PID.
+
 ## Local notification config (MacOS only)
 First of all, you need to allow notifications for Script Editor.
 Go to `System Preferences > Notifications` Then, locate `Script Editor` and turn on `Allow Notifications`

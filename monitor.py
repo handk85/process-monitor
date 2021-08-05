@@ -1,4 +1,5 @@
-from ddb import get_pids, batch_put_pid_info
+from ddb import get_processes, batch_put_pid_info, get_config
+from webhook import send_webhook, webhook_type_map, WebhookTypes
 from datetime import datetime
 import logging
 import socket
@@ -12,11 +13,12 @@ class ProcessInfo:
         self.host = host
         self.pid = pid
         self.status = "Running" if status else "Terminated"
-        self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.cmdline = cmdline
         self.started = started
+        self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def terminated(self):
+        self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.status = "Terminated"
 
 
@@ -25,28 +27,50 @@ def convert_create_time(create_time: float):
     return d.strftime("%Y-%m-%d %H:%M:%S")
 
 
+def notification(p_info: ProcessInfo):
+    config = get_config()
+    if not config or len(config) < 1:
+        return
+    for item in config:
+        if "webhook_url" in item:
+            webhook_type = WebhookTypes(item["webhook_type"])
+            webhook_class = webhook_type_map[webhook_type]
+            message = webhook_class(item["webhook_url"], "The process is terminated",
+                                    "The process is terminated", p_info.__dict__)
+            logging.info("Send %s webhook via %s", webhook_type.value, item["webhook_url"])
+            send_webhook(message)
+
+
 def update_monitor_table(host: str, info: dict):
-    pids = get_pids(host)
+    processes = get_processes(host)
     # if no info returned, just stop the function
-    if not pids or len(pids) < 1:
+    if not processes or len(processes) < 1:
         logging.info("No process ids to check in the host: %s", host)
         return
 
-    for pid in pids:
+    logging.info("Process Info: %s", info)
+    for item in processes:
+        pid = item['pid']
         if pid not in info and psutil.pid_exists(int(pid)):
             p = psutil.Process(int(pid))
             info[pid] = ProcessInfo(host, pid, True, " ".join(p.cmdline()),
                                     convert_create_time(p.create_time()))
-        if pid in info and not psutil.pid_exists(int(pid)):
-            info[pid].terminated()
+        if pid in info:
+            if info[pid].status == "Terminated":
+                del info[pid]
+                continue
+            if not psutil.pid_exists(int(pid)):
+                info[pid].terminated()
+                notification(info[pid])
 
     data = [v for k, v in info.items()]
-    batch_put_pid_info(data)
+    if len(data) > 0:
+        batch_put_pid_info(data)
 
 
 hostname = socket.gethostname()
 process_info = {}
-schedule.every(10).seconds.do(update_monitor_table, hostname, process_info)
+schedule.every(1).minutes.do(update_monitor_table, hostname, process_info)
 while True:
     schedule.run_pending()
     time.sleep(1)
