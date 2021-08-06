@@ -18,8 +18,10 @@ class ProcessInfo:
         self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def terminated(self):
-        self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.status = "Terminated"
+
+    def update(self):
+        self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def convert_create_time(create_time: float):
@@ -48,7 +50,7 @@ def update_monitor_table(host: str, info: dict):
         logging.info("No process ids to check in the host: %s", host)
         return
 
-    logging.info("Process Info: %s", info)
+    logging.info("Process IDs: %s", list(info.keys()))
     for item in processes:
         pid = item['pid']
         if pid not in info and psutil.pid_exists(int(pid)):
@@ -64,6 +66,7 @@ def update_monitor_table(host: str, info: dict):
                 notification(info[pid])
 
     data = [v for k, v in info.items()]
+    [p.update() for p in data]
     if len(data) > 0:
         batch_put_pid_info(data)
 
