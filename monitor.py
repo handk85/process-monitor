@@ -6,6 +6,7 @@ import socket
 import psutil
 import schedule
 import time
+import boto3
 
 
 class ProcessInfo:
@@ -22,6 +23,16 @@ class ProcessInfo:
 
     def update(self):
         self.updated = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def pretty_str(self):
+        return '''
+Host: %s
+PID: %s
+Status: %s
+Command: %s
+Started: %s
+Updated: %s
+        ''' % (self.host, self.pid, self.status, self.cmdline, self.started, self.updated)
 
 
 def convert_create_time(create_time: float):
@@ -41,6 +52,12 @@ def notification(p_info: ProcessInfo):
                                     "The process is terminated", p_info.__dict__)
             logging.info("Send %s webhook via %s", webhook_type.value, item["webhook_url"])
             send_webhook(message)
+        if "topic-arn" in item:
+            client = boto3.client("sns")
+            logging.info("Publish AWS SNS message to %s" % item["topic-arn"])
+            client.publish(TopicArn=item["topic-arn"],
+                           Subject="The process on %s is terminated" % p_info.host,
+                           Message=p_info.pretty_str())
 
 
 def update_monitor_table(host: str, info: dict):
