@@ -121,6 +121,16 @@ To add integration, you can register the webhook url by executing below command:
 ```
 The webhook information is also stored in DynamoDB. It uses "Config" as host name and a randomly generated PID.
 
+## Add AWS SNS notification
+AWS SNS let you get a notification via email.
+You can setup an AWS SNS topic by following this link: https://docs.aws.amazon.com/sns/latest/dg/sns-email-notifications.html
+
+Then, you can register the topic ARN for email notification.
+```
+>python3 register_sns.py [YOUR_SNS_TOPIC_ARN]
+```
+
+
 ## Local notification config (MacOS only)
 First of all, you need to allow notifications for Script Editor.
 Go to `System Preferences > Notifications` Then, locate `Script Editor` and turn on `Allow Notifications`
